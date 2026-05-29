@@ -1,0 +1,66 @@
+# Global settings for the GEO tracker
+# API keys are loaded from .env (never commit keys to this file)
+
+models:
+  gemini:
+    # Google's API. Free tier on 2.5 Flash: ~10 RPM, ~250 RPD.
+    # Enable billing in Google Cloud Console for higher limits.
+    enabled: true
+    model_id: "gemini-3.5-flash"
+    timeout_seconds: 30
+    max_output_tokens: 2048
+    # Retry behavior on 429 (rate limit) or 503 (overloaded)
+    max_retries: 4
+    base_backoff_seconds: 8
+    # GROUNDING: turn ON to make API behave like the consumer Gemini app.
+    # With grounding, Gemini does a live web search before answering,
+    # so YTEN appears even if it's not deeply in the training data.
+    # Free tier: 500 grounded requests/day. Paid: $14 per 1,000.
+    # Set false to measure pure training-data knowledge (no web search).
+    enable_grounding: true
+
+  perplexity:
+    # Perplexity API returns native citations - key advantage for GEO tracking
+    enabled: false
+    model_id: "sonar"   # sonar-pro for higher quality, sonar for cost
+    timeout_seconds: 30
+    max_output_tokens: 2048
+
+  # Stubs for v2 - leave disabled
+  claude:
+    enabled: false
+    model_id: "claude-opus-4-7"
+    timeout_seconds: 60
+    max_output_tokens: 2048
+    enable_web_search: true
+    web_search_max_uses: 5
+  openai:
+    enabled: false
+    model_id: "gpt-5"
+  copilot:
+    enabled: false   # Consumer-only, requires browser automation
+
+judge:
+  # The LLM judge that decides whether a brand is mentioned and how
+  # Using Claude Haiku for cost: ~$0.03 per full client run of 15 prompts x 2 models
+  provider: "anthropic"
+  model_id: "claude-haiku-4-5-20251001"
+  timeout_seconds: 20
+
+storage:
+  db_path: "data/geo_tracker.db"
+
+run:
+  # Pause between API calls. On Gemini free tier (10 RPM), keep this >= 6s
+  # to stay under the limit across 2 models. On paid Gemini, can drop to 1-2s.
+  modes:
+    test: 5
+    preview: 10
+    audit: 30
+    pro: 100
+
+  default_mode: test
+  delay_between_calls_seconds: 7
+  # Retry on transient failures
+  max_retries: 3
+  retry_backoff_seconds: 5

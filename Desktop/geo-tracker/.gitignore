@@ -1,0 +1,31 @@
+@"
+# Secrets — never commit these
+.env
+.env.local
+.env.*.local
+
+# Local data and outputs
+data/*.db
+data/*.db-journal
+reports/*.docx
+config/clients/auto/*.yaml
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+"@ | Out-File -FilePath .gitignore -Encoding utf8
