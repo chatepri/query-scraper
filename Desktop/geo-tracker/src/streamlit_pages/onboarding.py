@@ -84,7 +84,11 @@ def _save_yaml(target_dir: Path, mark_as_draft: bool) -> Path:
         path = target_dir / f"{client_id}.yaml"
 
     cfg = {
-        "client": {"id": client_id, "name": profile.name},
+        "client": {
+            "id": client_id,
+            "name": profile.name,
+            "url": profile.url,
+            },
         "variables": {
             "industry": profile.industry or "",
             "geography": profile.geography or "",

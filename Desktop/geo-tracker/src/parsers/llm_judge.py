@@ -54,7 +54,7 @@ Example output format:
   {{"name": "Acme Consulting", "normalized_name": "acme consulting", "entity_type": "company", "position": 1, "sentiment": "positive", "context_snippet": "Acme Consulting leads in...", "confidence": 0.95}},
   {{"name": "State University", "normalized_name": "state university", "entity_type": "university", "position": 2, "sentiment": "neutral", "context_snippet": "...", "confidence": 0.9}}
 ]
-What to EXCLUDE:
+What to EXCLUDE (do not extract):
 - Software platforms or SaaS products mentioned as TOOLS that providers
   INTEGRATE WITH or USE in their work. Examples of phrases that signal this:
   "connects to X", "integrates X with Y", "audits your tech stack including X",
@@ -66,6 +66,18 @@ What to EXCLUDE:
   Zapier, TechSoup, Raiser's Edge — when mentioned as integration targets.
   These ARE valid extractions if the prompt itself is asking about THEM
   (e.g. "best CRM platforms" → Salesforce is the answer).
+- Buildings, office complexes, venues, or addresses (e.g. "Regus Key Center", "Tri-Main Center", "Northpointe Pkwy")
+- Government programs or funding initiatives (e.g. "Empire AI", "Empire AI Consortium")
+- Cities, states, regions, or geographic areas
+- Generic category terms ("AI consultants", "training firms")
+- Software products or tools UNLESS they ARE the answer (if the question asks "which firms train people", then ChatGPT/Gemini/Copilot are just tools mentioned in passing — skip them)
+- Entities mentioned ONLY as a partner, sponsor, parent platform, or client of another provider — NOT as a standalone option. For example, if the text says "In partnership with Microsoft's TechSpark and IBM SkillsBuild, TechBuffalo provides...", then TechBuffalo is an answer but Microsoft and IBM are partners — skip Microsoft and IBM. Use the surrounding context to judge whether each entity is being recommended in its own right.
+- Software platforms or SaaS products mentioned as TOOLS that providers INTEGRATE WITH or USE in their work. Examples of phrases that signal this: "connects to X", "integrates X with Y", "audits your tech stack including X", "uses built-in AI features in platforms like X", "supports X, Y, Z". If the entity is described as something the consultant USES, CONNECTS TO, AUDITS, or HELPS YOU SET UP — it's a tool reference, not an answer to "who provides this service". SKIP these. Examples to skip: Salesforce, HubSpot, Microsoft Copilot, Google Workspace, Zapier, TechSoup, Raiser's Edge — when mentioned as integration targets. These ARE valid extractions if the prompt itself is asking about THEM (e.g. "best CRM platforms" → Salesforce is the answer).
+- People's names UNLESS they are a sole proprietor offering the service under their own name
+- Professional rating directories, lawyer-finding platforms, attorney search sites, comparison websites, or peer-review services. These appear in responses as places consumers go TO FIND providers — not as providers themselves. Examples to skip: Super Lawyers, Avvo, Martindale-Hubbell, Best Lawyers, Justia, Justia Lawyer Directory, Expertise.com, U.S. News & World Report, Best Law Firms, FindLaw, Lawyers.com, Nolo. These are valid extractions only if the prompt itself asks about rating directories (e.g. "best lawyer rating sites" → Super Lawyers is the answer).
+- Bar associations, professional licensing bodies, industry guilds, or trade organizations. Examples to skip: Ohio State Bar Association, Columbus Bar Association, Cleveland Metropolitan Bar Association, Cincinnati Bar Association, American Bar Association, American Medical Association. These appear as referral resources or licensing context, not as competing providers.
+- Government agencies, courts, police departments, emergency services, regulatory bodies, and licensing/compensation boards mentioned as referral context, official-action recipients, or background information. Examples to skip: Ohio State Highway Patrol, Columbus Division of Police, Franklin County Court of Common Pleas, Bureau of Workers' Compensation (BWC), Department of Insurance, Better Business Bureau, when they appear as "call X after an accident" / "file with Y" / "regulated by Z". Government entities ARE valid extractions if the prompt asks for them (e.g. "where to file workers comp claim Ohio" → BWC is the answer).
+- News publications, generic media outlets, or third-party publishers UNLESS the prompt is asking about media coverage. Examples to skip: U.S. News & World Report (also covered under rating directories), Forbes, Bloomberg, when they appear as "as featured in X" or "ranked by Y".
 """
 
 

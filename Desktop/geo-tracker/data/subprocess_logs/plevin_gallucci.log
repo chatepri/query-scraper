@@ -1,0 +1,129 @@
+
+Mode: test (5 iterations per prompt per model)
+
+============================================================
+Loading config: config\clients\plevin_gallucci.yaml
+============================================================
+
+Client: Plevin & Gallucci (plevin_gallucci)
+Prompts in this run: 5
+
+Initializing dispatchers...
+  [+] Gemini (gemini-3.5-flash, grounded, 5 runs/prompt)
+
+Initializing extractor...
+  [+] Claude extractor (claude-haiku-4-5-20251001)
+
+Initializing storage...
+  [+] SQLite at data/geo_tracker.db
+
+============================================================
+Running 25 API calls total
+  5 prompts x 1 models
+============================================================
+
+[1/25] gemini | p001 | iter 1/5 | best workers compensation lawyers in Cleveland Ohi...
+    [+] extracted 12 businesses
+        1. Ohio Bureau of Workers' Compensation (BWC) (government)
+        2. Industrial Commission of Ohio (government)
+        3. Super Lawyers (company)
+        ... and 9 more
+[2/25] gemini | p001 | iter 2/5 | best workers compensation lawyers in Cleveland Ohi...
+    [+] extracted 13 businesses
+[3/25] gemini | p001 | iter 3/5 | best workers compensation lawyers in Cleveland Ohi...
+    [+] extracted 12 businesses
+[4/25] gemini | p001 | iter 4/5 | best workers compensation lawyers in Cleveland Ohi...
+    [+] extracted 18 businesses
+[5/25] gemini | p001 | iter 5/5 | best workers compensation lawyers in Cleveland Ohi...
+    [+] extracted 14 businesses
+[6/25] gemini | p002 | iter 1/5 | personal injury attorneys near me Ohio...
+    [+] extracted 15 businesses
+        1. Elk + Elk (company)
+        2. Kisling, Nestico & Redick (KNR) (company)
+        3. Nager, Romaine, Schneiberg (NRS) Co., L.P.A. (company)
+        ... and 12 more
+[7/25] gemini | p002 | iter 2/5 | personal injury attorneys near me Ohio...
+    [+] extracted 15 businesses
+[8/25] gemini | p002 | iter 3/5 | personal injury attorneys near me Ohio...
+    [+] extracted 16 businesses
+[9/25] gemini | p002 | iter 4/5 | personal injury attorneys near me Ohio...
+    [+] extracted 18 businesses
+[10/25] gemini | p002 | iter 5/5 | personal injury attorneys near me Ohio...
+    [+] extracted 20 businesses
+[11/25] gemini | p003 | iter 1/5 | car accident lawyer Columbus Ohio...
+    [+] extracted 6 businesses
+        1. Schiff & Associates (company)
+        2. The Fitch Law Firm (company)
+        3. Colombo Law (company)
+        ... and 3 more
+[12/25] gemini | p003 | iter 2/5 | car accident lawyer Columbus Ohio...
+    [+] extracted 9 businesses
+[13/25] gemini | p003 | iter 3/5 | car accident lawyer Columbus Ohio...
+    [+] extracted 11 businesses
+[14/25] gemini | p003 | iter 4/5 | car accident lawyer Columbus Ohio...
+    [+] extracted 8 businesses
+[15/25] gemini | p003 | iter 5/5 | car accident lawyer Columbus Ohio...
+    [+] extracted 8 businesses
+[16/25] gemini | p004 | iter 1/5 | medical malpractice lawsuit attorney Ohio...
+    [+] extracted 12 businesses
+        1. The Eisen Law Firm (company)
+        2. The Becker Law Firm (company)
+        3. Nurenberg, Paris, Heller & McCarthy (company)
+        ... and 9 more
+[17/25] gemini | p004 | iter 2/5 | medical malpractice lawsuit attorney Ohio...
+    [+] extracted 10 businesses
+[18/25] gemini | p004 | iter 3/5 | medical malpractice lawsuit attorney Ohio...
+    [+] extracted 8 businesses
+[19/25] gemini | p004 | iter 4/5 | medical malpractice lawsuit attorney Ohio...
+    [+] extracted 10 businesses
+[20/25] gemini | p004 | iter 5/5 | medical malpractice lawsuit attorney Ohio...
+    [+] extracted 7 businesses
+[21/25] gemini | p005 | iter 1/5 | Best lawyers for employee intentional tort claims ...
+    [+] extracted 8 businesses
+        1. Plevin & Gallucci Co., L.P.A. (company)
+        2. Bashein & Bashein Co., L.P.A. (company)
+        3. Kampinski & Roberts, LPA (company)
+        ... and 5 more
+[22/25] gemini | p005 | iter 2/5 | Best lawyers for employee intentional tort claims ...
+    [+] extracted 8 businesses
+[23/25] gemini | p005 | iter 3/5 | Best lawyers for employee intentional tort claims ...
+    [+] extracted 6 businesses
+[24/25] gemini | p005 | iter 4/5 | Best lawyers for employee intentional tort claims ...
+    [+] extracted 8 businesses
+[25/25] gemini | p005 | iter 5/5 | Best lawyers for employee intentional tort claims ...
+    [+] extracted 8 businesses
+
+============================================================
+Leaderboard — Top businesses across all prompts, models, iterations
+============================================================
+
+Rank  Business                            Mentions   Models   Avg Pos    #1s  
+--------------------------------------------------------------------------------
+1     Kisling, Nestico & Redick (KNR)     10         1        3.5        0    
+2     Plevin & Gallucci Company LPA       10         1        3.8        4    
+3     Schiff & Associates                 9          1        3.0        5    
+4     Bentoff & Duber Co., L.P.A.         8          1        5.1        0    
+5     Cooper Elliott                      8          1        5.2        0    
+6     The Becker Law Firm                 8          1        5.6        0    
+7     Ohio State Bar Association (OSBA)   7          1        8.4        3    
+8     Super Lawyers                       7          1        8.7        0    
+9     NRS Injury Law (Nager, Romaine, S   6          1        3.0        2    
+10    Kampinski & Roberts, LPA            5          1        2.8        1    
+11    The Moore Law Firm                  5          1        7.8        0    
+12    The Eisen Law Firm                  4          1        1.8        3    
+13    Ohio's Bureau of Workers' Compens   4          1        3.0        3    
+14    Colombo Law                         4          1        3.8        0    
+15    Nager, Romaine & Schneiberg Co.,    4          1        4.5        0    
+16    Kendis, O'Brien & Stanek Co., LPA   4          1        6.5        0    
+17    Martindale-Hubbell                  4          1        7.5        0    
+18    Ohio State Highway Patrol           4          1        8.8        0    
+19    Best Lawyers                        4          1        9.5        0    
+20    O'Connor, Acciani & Levy            4          1        10.2       0    
+21    The Law Offices of Blake R. Maisl   4          1        12.2       0    
+22    Elk + Elk                           3          1        1.3        2    
+23    The Fitch Law Firm LLC              3          1        3.0        0    
+24    Colley Shroyer Abraham              3          1        4.7        0    
+25    Nurenberg, Paris, Heller & McCart   3          1        4.7        0    
+
+Done. Raw data in data/geo_tracker.db
+
