@@ -225,8 +225,11 @@ def render():
             try:
                 path = _save_yaml(SAVED_DIR, mark_as_draft=False)
                 st.session_state.ob_saved_path = str(path)
-                st.session_state.ob_next_action = "run"
-                st.success(f"Saved profile → {path}")
+                # Set up the Run page to pre-fill this profile, then jump there
+                st.session_state.run_target = str(path)
+                st.session_state.active_client_id = st.session_state.ob_client_id
+                st.session_state.page = "run"
+                st.success(f"Saved profile → {path}. Configure your run...")
                 st.rerun()
             except Exception as e:
                 st.error(f"Save failed: {e}")

@@ -54,6 +54,18 @@ Example output format:
   {{"name": "Acme Consulting", "normalized_name": "acme consulting", "entity_type": "company", "position": 1, "sentiment": "positive", "context_snippet": "Acme Consulting leads in...", "confidence": 0.95}},
   {{"name": "State University", "normalized_name": "state university", "entity_type": "university", "position": 2, "sentiment": "neutral", "context_snippet": "...", "confidence": 0.9}}
 ]
+What to EXCLUDE:
+- Software platforms or SaaS products mentioned as TOOLS that providers
+  INTEGRATE WITH or USE in their work. Examples of phrases that signal this:
+  "connects to X", "integrates X with Y", "audits your tech stack including X",
+  "uses built-in AI features in platforms like X", "supports X, Y, Z".
+  If the entity is described as something the consultant USES, CONNECTS TO,
+  AUDITS, or HELPS YOU SET UP — it's a tool reference, not an answer to
+  "who provides this service". SKIP these.
+  Examples to skip: Salesforce, HubSpot, Microsoft Copilot, Google Workspace,
+  Zapier, TechSoup, Raiser's Edge — when mentioned as integration targets.
+  These ARE valid extractions if the prompt itself is asking about THEM
+  (e.g. "best CRM platforms" → Salesforce is the answer).
 """
 
 

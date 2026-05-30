@@ -19,6 +19,7 @@ import yaml
 import itertools
 import re
 from pathlib import Path
+from src import run_status
 from src.dispatchers.gemini import GeminiDispatcher
 from src.dispatchers.perplexity import PerplexityDispatcher
 from src.parsers.llm_judge import LLMJudge
@@ -115,7 +116,7 @@ def build_dispatchers(settings: dict) -> list:
     return dispatchers
 
 
-def run_client(client_yaml_path: str, 
+def run_client(client_yaml_path: str,
                settings_path: str = "config/settings.yaml",
                iterations_override: int = None):
     print(f"\n{'='*60}")
@@ -124,8 +125,8 @@ def run_client(client_yaml_path: str,
 
     client_config = load_yaml(client_yaml_path)
     settings = load_yaml(settings_path)
+
     if iterations_override is not None:
-        # Mode-based override from run.py CLI flag
         settings["run"]["runs_per_prompt"] = iterations_override
 
     client = client_config["client"]
@@ -156,66 +157,99 @@ def run_client(client_yaml_path: str,
     total_calls = sum(len(prompts) * runs for _, runs in dispatcher_specs)
     call_num = 0
 
+    # Determine mode name for status table (best-effort from settings)
+    mode_name = "preview"
+    for name, count in settings["run"].get("modes", {}).items():
+        if count == settings["run"].get("runs_per_prompt"):
+            mode_name = name
+            break
+
+    run_status.start_run(
+        client_id=client["id"],
+        mode=mode_name,
+        total_calls=total_calls,
+    )
+
     print(f"\n{'='*60}")
     print(f"Running {total_calls} API calls total")
     print(f"  {len(prompts)} prompts x {len(dispatcher_specs)} models")
-    print(f"  Repeat runs vary per model (see above)")
     print(f"{'='*60}\n")
 
-    for prompt in prompts:
-        for dispatcher, runs_per_prompt in dispatcher_specs:
-            for iteration in range(1, runs_per_prompt + 1):
-                call_num += 1
-                print(f"[{call_num}/{total_calls}] {dispatcher.name} | "
-                      f"{prompt['id']} | iter {iteration}/{runs_per_prompt} | "
-                      f"{prompt['text'][:50]}...")
+    try:
+        for prompt in prompts:
+            for dispatcher, runs_per_prompt in dispatcher_specs:
+                for iteration in range(1, runs_per_prompt + 1):
+                    call_num += 1
+                    print(f"[{call_num}/{total_calls}] {dispatcher.name} | "
+                          f"{prompt['id']} | iter {iteration}/{runs_per_prompt} | "
+                          f"{prompt['text'][:50]}...")
 
-                response = dispatcher.dispatch(
-                    client_id=client["id"],
-                    prompt_id=prompt["id"],
-                    prompt_text=prompt["text"],
-                )
-                response.run_iteration = iteration
+                    response = dispatcher.dispatch(
+                        client_id=client["id"],
+                        prompt_id=prompt["id"],
+                        prompt_text=prompt["text"],
+                    )
+                    response.run_iteration = iteration
 
-                if response.error:
-                    print(f"    [error] {response.error}")
-                    store.save_response(response)
+                    if response.error:
+                        print(f"    [error] {response.error}")
+                        store.save_response(response)
+                        run_status.update_progress(
+                            client_id=client["id"],
+                            completed_calls=call_num,
+                            current_prompt_id=prompt["id"],
+                        )
+                        time.sleep(delay)
+                        continue
+
+                    response_id = store.save_response(response)
+                    businesses = judge.extract(response, response_id)
+                    store.save_extractions(businesses)
+
+                    run_status.update_progress(
+                        client_id=client["id"],
+                        completed_calls=call_num,
+                        current_prompt_id=prompt["id"],
+                    )
+
+                    print(f"    [+] extracted {len(businesses)} businesses")
+                    if businesses and iteration == 1:
+                        for b in businesses[:3]:
+                            print(f"        {b.position}. {b.name} ({b.entity_type})")
+                        if len(businesses) > 3:
+                            print(f"        ... and {len(businesses) - 3} more")
+
                     time.sleep(delay)
-                    continue
 
-                response_id = store.save_response(response)
-                businesses = judge.extract(response, response_id)
-                store.save_extractions(businesses)
+        run_status.mark_completed(client_id=client["id"])
 
-                print(f"    [+] extracted {len(businesses)} businesses")
-                if businesses and iteration == 1:
-                    for b in businesses[:3]:
-                        print(f"        {b.position}. {b.name} ({b.entity_type})")
-                    if len(businesses) > 3:
-                        print(f"        ... and {len(businesses) - 3} more")
+    except Exception as e:
+        run_status.mark_failed(client_id=client["id"], error_message=str(e))
+        raise
 
-                time.sleep(delay)
+    finally:
+        # Summary always prints, even if the run failed partway through
+        try:
+            print(f"\n{'='*60}")
+            print("Leaderboard — Top businesses across all prompts, models, iterations")
+            print(f"{'='*60}\n")
+            rows = store.leaderboard(client["id"], limit=25)
 
-    print(f"\n{'='*60}")
-    print("Leaderboard — Top businesses across all prompts, models, iterations")
-    print(f"{'='*60}\n")
-    rows = store.leaderboard(client["id"], limit=25)
-
-    if not rows:
-        print("No businesses extracted. Check raw responses with inspect_response.py")
-    else:
-        print(f"{'Rank':<5} {'Business':<35} {'Mentions':<10} "
-              f"{'Models':<8} {'Avg Pos':<10} {'#1s':<5}")
-        print("-" * 80)
-        for i, row in enumerate(rows, 1):
-            name = row["display_name"][:33]
-            avg_pos = f"{row['avg_position']:.1f}" if row['avg_position'] else "-"
-            print(f"{i:<5} {name:<35} {row['total_mentions']:<10} "
-                  f"{row['models_mentioning']:<8} {avg_pos:<10} "
-                  f"{row['times_ranked_first']:<5}")
-
-    store.close()
-    print(f"\nDone. Raw data in {settings['storage']['db_path']}\n")
+            if not rows:
+                print("No businesses extracted.")
+            else:
+                print(f"{'Rank':<5} {'Business':<35} {'Mentions':<10} "
+                      f"{'Models':<8} {'Avg Pos':<10} {'#1s':<5}")
+                print("-" * 80)
+                for i, row in enumerate(rows, 1):
+                    name = row["display_name"][:33]
+                    avg_pos = f"{row['avg_position']:.1f}" if row['avg_position'] else "-"
+                    print(f"{i:<5} {name:<35} {row['total_mentions']:<10} "
+                          f"{row['models_mentioning']:<8} {avg_pos:<10} "
+                          f"{row['times_ranked_first']:<5}")
+        finally:
+            store.close()
+            print(f"\nDone. Raw data in {settings['storage']['db_path']}\n")
 
 
 if __name__ == "__main__":

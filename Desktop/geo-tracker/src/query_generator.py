@@ -71,19 +71,75 @@ def _extract_text(html: str, max_chars: int = 8000) -> str:
 
 
 def scrape_site(url: str, max_pages: int = 4) -> tuple[str, list[str], list[str]]:
-    """Fetch homepage + a few internal pages. Returns (text, pages_fetched, warnings)."""
+    """Fetch homepage + a few internal pages. Returns (text, pages_fetched, warnings).
+
+    Tries several URL variants in priority order. Customers commonly enter the
+    bare apex domain ('example.com'), but many sites only resolve the www
+    subdomain — so we try both forms and use whichever returns real content.
+    """
     url = _normalize_url(url)
     parsed = urlparse(url)
-    base = f"{parsed.scheme}://{parsed.netloc}"
+    netloc = parsed.netloc
+
+    # Build candidate URLs to try in order. Starts with what the user gave us;
+    # adds the www-stripped or www-added variant; tries http as last resort.
+    candidates = []
+    base_path = parsed.path or "/"
+
+    # 1. User's input, exactly as normalized
+    candidates.append(f"{parsed.scheme}://{netloc}{base_path}")
+
+    # 2. Toggle www: if they gave bare apex, try www; if they gave www, try bare
+    if netloc.startswith("www."):
+        alt_netloc = netloc[4:]
+    else:
+        alt_netloc = f"www.{netloc}"
+    candidates.append(f"{parsed.scheme}://{alt_netloc}{base_path}")
+
+    # 3. http fallback (some sites still serve http and redirect)
+    if parsed.scheme == "https":
+        candidates.append(f"http://{netloc}{base_path}")
 
     pages_fetched = []
     warnings = []
     chunks = []
 
-    home_html = _fetch(url)
+    home_html = None
+    successful_url = None
+    attempt_log = []
+
+    for candidate in candidates:
+        attempt_log.append(candidate)
+        html = _fetch(candidate)
+        if html:
+            home_html = html
+            successful_url = candidate
+            break
+
     if not home_html:
-        warnings.append(f"Could not fetch homepage: {url}")
+        warnings.append(
+            f"Could not fetch any variant of the URL. Tried: "
+            f"{', '.join(attempt_log)}. The site may be down, blocking "
+            f"automated requests, or using JavaScript that requires a real browser."
+        )
         return "", [], warnings
+
+    # Update base to whatever variant succeeded — subsequent /about, /services
+    # fetches should use the same host that worked
+    parsed_success = urlparse(successful_url)
+    base = f"{parsed_success.scheme}://{parsed_success.netloc}"
+
+    chunks.append(f"[HOMEPAGE]\n{_extract_text(home_html)}")
+    pages_fetched.append(successful_url)
+
+    # Note in warnings if we had to fall back to a non-original URL
+    if successful_url != candidates[0]:
+        warnings.append(
+            f"Note: fetched {successful_url} instead of {candidates[0]} "
+            f"(the original URL didn't respond — common for bare-apex domains "
+            f"on Squarespace and similar hosts)."
+        )
+    
     chunks.append(f"[HOMEPAGE]\n{_extract_text(home_html)}")
     pages_fetched.append(url)
 

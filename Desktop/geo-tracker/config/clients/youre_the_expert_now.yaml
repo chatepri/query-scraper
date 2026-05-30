@@ -1,0 +1,13 @@
+client:
+  id: youre_the_expert_now
+  name: You're The Expert Now
+variables:
+  industry: Generative AI consulting and training
+  geography: Buffalo, NY and Western New York (live and remote)
+  audience: Small businesses, nonprofits, and organizations under 500 employees
+prompts:
+- generative AI training for small business Buffalo NY
+- ChatGPT consulting services for nonprofits
+- best AI adoption consultants in Western New York
+- who offers generative AI team training workshops
+- responsible AI implementation consulting for small organizations

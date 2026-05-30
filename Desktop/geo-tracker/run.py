@@ -34,8 +34,8 @@ def dry_run(client_path: str):
 def main():
     parser = argparse.ArgumentParser(description="GEO tracker runner")
     parser.add_argument("client_path", nargs="?",
-                        default="config/clients/yten.yaml",
-                        help="Path to client YAML")
+                        default=None,
+                        help="Path to client YAML (omit to see list of available clients)")
     parser.add_argument("--mode", choices=["test", "preview", "audit"],
                         default=None,
                         help="Iteration mode (overrides settings.default_mode)")
@@ -43,6 +43,20 @@ def main():
                         help="Preview the prompt set, do not call APIs")
     args = parser.parse_args()
 
+    if not args.client_path:
+        from pathlib import Path
+        clients_dir = Path("config/clients")
+        available = sorted(clients_dir.glob("*.yaml"))
+        if not available:
+            print("No client profiles found. Run onboarding first.")
+            print("  streamlit run streamlit_app.py")
+            return
+        print("Available client profiles:")
+        for p in available:
+            print(f"  {p}")
+        print("\nUsage: python run.py <path-to-client-yaml> [--mode test|preview|audit|pro]")
+        return
+    
     if args.dry_run:
         dry_run(args.client_path)
         return

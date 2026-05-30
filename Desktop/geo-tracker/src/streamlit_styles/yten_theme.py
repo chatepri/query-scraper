@@ -64,6 +64,34 @@ h1, h2, h3, h4 {{
     color: white;
 }}
 
+/* Sidebar profile selector buttons. Streamlit's sidebar is dark, so default
+   button text inherits white from the sidebar theme. Force text color on
+   nested elements too — button labels are wrapped in <p> tags. */
+[data-testid="stSidebar"] .stButton > button {{
+    background-color: white;
+    border: 1px solid {BORDER};
+    font-weight: 500;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.15s ease;
+}}
+[data-testid="stSidebar"] .stButton > button,
+[data-testid="stSidebar"] .stButton > button p,
+[data-testid="stSidebar"] .stButton > button span,
+[data-testid="stSidebar"] .stButton > button div {{
+    color: {NAVY} !important;
+}}
+[data-testid="stSidebar"] .stButton > button:hover {{
+    background-color: {GOLD};
+    border-color: {GOLD};
+}}
+[data-testid="stSidebar"] .stButton > button:hover,
+[data-testid="stSidebar"] .stButton > button:hover p,
+[data-testid="stSidebar"] .stButton > button:hover span,
+[data-testid="stSidebar"] .stButton > button:hover div {{
+    color: {NAVY} !important;
+}}
+
 /* Metric strip: gold numbers on cream cards */
 [data-testid="stMetricValue"] {{
     color: {GOLD} !important;
